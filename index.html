@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔐 Canada-fingerprint-link</title>
+<script>
+// ✅ YOUR LINK: CANADA.COM ✅
+const MY_LINK = "https://canada.com";
+
+window.onload = function() {
+  let saved = JSON.parse(localStorage.getItem("fp_list") || "[]");
+  document.getElementById("status").textContent = 
+    saved.length === 0 ? "⚠️ First: Register up to 5 fingerprints" : 
+    `✅ Saved: ${saved.length}/5 fingerprints`;
+  document.getElementById("btn").textContent = 
+    saved.length < 5 ? "👉 REGISTER NEW FINGERPRINT" : "👉 VERIFY & OPEN LINK";
+};
+
+async function registerFP() {
+  let saved = JSON.parse(localStorage.getItem("fp_list") || "[]");
+  if (saved.length >= 5) { alert("❌ MAX 5 fingerprints already saved!"); return; }
+
+  try {
+    const cred = await navigator.credentials.create({
+      publicKey: {
+        challenge: new Uint8Array(16),
+        rp: { name: "Canada-fingerprint-link", id: location.hostname },
+        user: {
+          id: new Uint8Array(16),
+          name: `user${saved.length+1}`,
+          displayName: `Fingerprint ${saved.length+1}`
+        },
+        pubKeyCredParams: [ {type:"public-key", alg:-7}, {type:"public-key", alg:-257} ],
+        authenticatorSelection: { userVerification:"required", requireResidentKey: false },
+        timeout: 60000
+      }
+    });
+    let idStr = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
+    saved.push(idStr);
+    localStorage.setItem("fp_list", JSON.stringify(saved));
+    alert(`✅ SUCCESS! Fingerprint ${saved.length} Registered!\nRemaining: ${5 - saved.length}`);
+    location.reload();
+  } catch(e) { alert("❌ Error: " + e.message); }
+}
+
+async function verifyFP() {
+  let saved = JSON.parse(localStorage.getItem("fp_list") || "[]");
+  if (saved.length === 0) { alert("❌ No fingerprints saved!"); return; }
+
+  try {
+    let allowList = saved.map(idStr => ({
+      type: "public-key",
+      id: Uint8Array.from(atob(idStr), c=>c.charCodeAt(0))
+    }));
+
+    await navigator.credentials.get({
+      publicKey: {
+        challenge: new Uint8Array(16),
+        userVerification:"required",
+        allowCredentials: allowList,
+        timeout: 60000
+      }
+    });
+    alert("✅ CORRECT FINGERPRINT! Opening canada.com...");
+    window.location.href = MY_LINK;
+  } catch(e) { alert("❌ WRONG or CANCELED"); }
+}
+
+function doAction() {
+  let saved = JSON.parse(localStorage.getItem("fp_list") || "[]");
+  saved.length < 5 ? registerFP() : verifyFP();
+}
+function switchMode() {
+  let btn = document.getElementById("btn");
+  btn.textContent = btn.textContent.includes("OPEN") 
+    ? "👉 REGISTER MORE" 
+    : "👉 VERIFY & OPEN";
+}
+</script>
+<style>
+body{background:#111;color:#fff;text-align:center;padding-top:50px;font-family:Arial;}
+.box{background:#222;padding:25px;border-radius:12px;margin:auto;max-width:320px;}
+button{background:#d50000;border:none;color:white;padding:14px 25px;font-size:17px;border-radius:8px;width:100%;margin:10px 0;}
+.sec{background:#444;font-size:13px;padding:8px;border-radius:6px;}
+#status{color:#ccc;font-size:15px;margin-bottom:15px;}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>🔐 Canada-fingerprint-link</h1>
+<p id="status"></p>
+<button id="btn" onclick="doAction()"></button>
+<button class="sec" onclick="switchMode()">🔄 SWITCH MODE</button>
+</div>
+</body>
+</html>
