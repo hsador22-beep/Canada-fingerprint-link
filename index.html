@@ -1,180 +1,118 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🔐 Canada-fingerprint-link</title>
-<script>
-// ✅ YOUR FINAL LINK ✅
-const MY_LINK = "https://canada.com";
+<!-- // This function ensures only unique fingerprints are saved
+async function registerUniqueFingerprint(userId) {
+    const existingPrints = getSavedPrints(userId); // Pulls from database/storage
 
-window.onload = function() {
-  updateUserList();
-  let current = localStorage.getItem("current_user");
-  if (current) {
-    showSection("logged_in");
-    document.getElementById("current_user").textContent = current;
-    updateCount();
-  } else {
-    showSection("welcome");
-  }
-};
+    if (existingPrints.length >= 5) {
+        alert("All 5 fingers are already registered!");
+        return;
+    }
 
-// --- SWITCH SCREENS ---
-function showSection(name) {
-  document.querySelectorAll(".sec").forEach(s => s.style.display = "none");
-  document.getElementById("sec_"+name).style.display = "block";
+    try {
+        const credential = await navigator.credentials.create({
+            publicKey: publicKeyCredentialCreationOptions
+        });
+
+        // Check if this specific hardware ID is already in our list
+        const isDuplicate = existingPrints.some(print => print.id === credential.id);
+
+        if (isDuplicate) {
+            alert("❌ This finger is already registered! Please use a different finger.");
+        } else {
+            saveNewPrint(userId, credential);
+            alert(`✅ Finger ${existingPrints.length + 1} registered successfully!`);
+        }
+    } catch (err) {
+        console.error("Biometric registration failed", err);
+    }
 }
-
-// --- SHOW ALL REGISTERED PEOPLE ---
-function updateUserList() {
-  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
-  let list = document.getElementById("user_list");
-  list.innerHTML = "";
-  if (Object.keys(all).length === 0) {
-    list.innerHTML = "<p class='note'>No one signed up yet</p>";
-    return;
-  }
-  for (let name in all) {
-    let btn = document.createElement("button");
-    btn.className = "btn-sm";
-    btn.textContent = `👤 ${name} (${all[name].fps.length}/5)`;
-    btn.onclick = () => {
-      localStorage.setItem("current_user", name);
-      showSection("logged_in");
-      document.getElementById("current_user").textContent = name;
-      updateCount();
-    };
-    list.appendChild(btn);
-  }
-}
-
-// --- ✅ SIGN UP NEW PERSON ---
-async function signUp() {
-  let name = document.getElementById("new_name").value.trim();
-  if (!name) { alert("❌ Enter your name first!"); return; }
-
-  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
-  if (all[name]) { alert("❌ This name is ALREADY signed up!"); return; }
-
-  // Create account — empty fingerprints
-  all[name] = { fps: [] };
-  localStorage.setItem("all_users", JSON.stringify(all));
-  localStorage.setItem("current_user", name);
-  alert(`✅ SIGN UP SUCCESS!\nWelcome: ${name}\nNow save your 5 fingerprints`);
-  document.getElementById("new_name").value = "";
-  updateUserList();
-  showSection("logged_in");
-  updateCount();
-}
-
-// --- ✅ SAVE 1 FINGERPRINT (DO 5 TIMES) ---
-async function saveFinger() {
-  let user = localStorage.getItem("current_user");
-  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
-  if (!all[user]) return;
-
-  if (all[user].fps.length >= 5) {
-    alert("✅ YOU HAVE SAVED ALL 5 FINGERS ALREADY!");
-    return;
-  }
-
-  try {
-    const cred = await navigator.credentials.create({
-      publicKey: {
-        challenge: new Uint8Array(16),
-        rp: { name: "Canada-fingerprint-link", id: location.hostname },
-        user: { id: new Uint8Array(16), name: user, displayName: user },
-        pubKeyCredParams: [ {type:"public-key", alg:-7}, {type:"public-key", alg:-257} ],
-        authenticatorSelection: { userVerification:"required", requireResidentKey: false },
-        timeout: 60000
-      }
-    });
-    let idStr = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
-    all[user].fps.push(idStr);
-    localStorage.setItem("all_users", JSON.stringify(all));
-    updateCount();
-    updateUserList();
-    alert(`✅ Fingerprint saved!\n${all[user].fps.length} / 5`);
-  } catch(e) { alert("❌ Failed: " + e.message); }
-}
-
-// --- ✅ LOGIN: ONLY YOUR FINGERS WORK ---
-async function login() {
-  let user = localStorage.getItem("current_user");
-  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
-  if (!all[user] || all[user].fps.length === 0) {
-    alert("❌ Save 5 fingerprints first!");
-    return;
-  }
-
-  try {
-    let allowed = all[user].fps.map(id => ({
-      type: "public-key",
-      id: Uint8Array.from(atob(id), c=>c.charCodeAt(0))
-    }));
-
-    await navigator.credentials.get({
-      publicKey: {
-        challenge: new Uint8Array(16),
-        userVerification:"required",
-        allowCredentials: allowed,
-        timeout: 60000
-      }
-    });
-
-    alert("✅ LOGIN SUCCESS!\nCorrect fingerprint ✅\nOpening canada.com...");
-    window.location.href = MY_LINK;
-  } catch(e) { alert("❌ WRONG FINGERPRINT OR NOT YOURS!\nCANNOT LOGIN!"); }
-}
-
-// --- ✅ LOGOUT ---
-function logout() {
-  localStorage.removeItem("current_user");
-  showSection("welcome");
-  updateUserList();
-}
-
-// --- UPDATE COUNT ---
-function updateCount() {
-  let user = localStorage.getItem("current_user");
-  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
-  document.getElementById("count").textContent = all[user]?.fps.length || 0;
-}
-</script>
+Optimized CSS for a High-End Look -->
 <style>
-body{background:#111;color:#fff;text-align:center;padding-top:40px;font-family:Arial;}
-.box{background:#222;padding:25px;border-radius:12px;margin:auto;max-width:340px;margin-bottom:15px;}
-input{width:90%;padding:12px;font-size:16px;border-radius:6px;border:none;margin-bottom:12px;}
-button{border:none;color:white;padding:13px 20px;font-size:16px;border-radius:8px;width:100%;margin:5px 0;}
-.btn-main{background:#d50000;}
-.btn-sec{background:#444;}
-.btn-sm{background:#333;font-size:13px;padding:6px 10px;margin:3px;}
-h2{margin:0 0 12px 0;font-size:18px;}
-.note{color:#aaa;font-size:14px;}
+:root {
+    --primary-glow: #00f2ff;
+    --success-glow: #00ff88;
+    --bg-dark: #0a0a0c;
+    --glass: rgba(255, 255, 255, 0.05);
+}
+
+body {
+    background: radial-gradient(circle at center, #1a1a2e 0%, var(--bg-dark) 100%);
+    color: white;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.smart-card {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 40px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+}
+
+.finger-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin: 30px 0;
+}
+
+.finger-dot {
+    height: 40px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.4s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+
+.finger-dot.active {
+    background: var(--primary-glow);
+    box-shadow: 0 0 15px var(--primary-glow);
+    color: #000;
+    border: none;
+}
+
+.btn-smart {
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    border: none;
+    padding: 15px 30px;
+    border-radius: 12px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    transition: transform 0.2s;
+}
+
+.btn-smart:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(255, 75, 43, 0.3);
+}
 </style>
-</head>
-<body>
 
-<!-- === WELCOME / SIGN UP SCREEN === -->
-<div id="sec_welcome" class="sec box">
-<h2>📝 SIGN UP | ALL USERS</h2>
-<div id="user_list"></div>
-<br>
-<input type="text" id="new_name" placeholder="Enter your name...">
-<button class="btn-main" onclick="signUp()">➕ SIGN UP NEW PERSON</button>
+<div class="smart-card">
+    <div style="font-size: 0.8rem; letter-spacing: 2px; opacity: 0.6;">BIOMETRIC AUTH v2.0</div>
+    <h2 id="status-title">Initialize Scan</h2>
+    
+    <!-- Smart Finger Indicators -->
+    <div class="finger-grid" id="fingerGrid">
+        <div class="finger-dot">1</div>
+        <div class="finger-dot">2</div>
+        <div class="finger-dot">3</div>
+        <div class="finger-dot">4</div>
+        <div class="finger-dot">5</div>
+    </div>
+
+    <p id="instruction-text" style="font-size: 0.9rem; margin-bottom: 20px;">Place unique finger on sensor to begin.</p>
+    
+    <button class="btn-smart" onclick="startSmartScan()">REGISTER FINGER</button>
 </div>
-
-<!-- === LOGIN SCREEN === -->
-<div id="sec_logged_in" class="sec box" style="display:none;">
-<h2>👤 USER: <span id="current_user"></span></h2>
-<p class="note">Fingerprints saved: <span id="count">0</span> / 5</p>
-
-<button class="btn-main" onclick="saveFinger()">✋ SAVE 1 FINGERPRINT</button>
-<button class="btn-main" onclick="login()">👉 LOGIN WITH FINGERPRINT</button>
-
-<button class="btn-sec" onclick="logout()">🔄 LOGOUT / BACK</button>
-</div>
-
-</body>
-</html>
