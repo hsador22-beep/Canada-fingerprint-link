@@ -1,135 +1,180 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Biometric Sign Up & Login</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
-        .card { background: white; padding: 20px; border-radius: 8px; max-width: 400px; margin: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        button { width: 100%; padding: 10px; margin: 10px 0; cursor: pointer; border: none; border-radius: 4px; background: #007bff; color: white; }
-        .status { padding: 10px; background: #eee; margin-top: 10px; font-size: 14px; }
-        .registered { color: green; font-weight: bold; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔐 Canada-fingerprint-link</title>
+<script>
+// ✅ YOUR FINAL LINK ✅
+const MY_LINK = "https://canada.com";
+
+window.onload = function() {
+  updateUserList();
+  let current = localStorage.getItem("current_user");
+  if (current) {
+    showSection("logged_in");
+    document.getElementById("current_user").textContent = current;
+    updateCount();
+  } else {
+    showSection("welcome");
+  }
+};
+
+// --- SWITCH SCREENS ---
+function showSection(name) {
+  document.querySelectorAll(".sec").forEach(s => s.style.display = "none");
+  document.getElementById("sec_"+name).style.display = "block";
+}
+
+// --- SHOW ALL REGISTERED PEOPLE ---
+function updateUserList() {
+  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+  let list = document.getElementById("user_list");
+  list.innerHTML = "";
+  if (Object.keys(all).length === 0) {
+    list.innerHTML = "<p class='note'>No one signed up yet</p>";
+    return;
+  }
+  for (let name in all) {
+    let btn = document.createElement("button");
+    btn.className = "btn-sm";
+    btn.textContent = `👤 ${name} (${all[name].fps.length}/5)`;
+    btn.onclick = () => {
+      localStorage.setItem("current_user", name);
+      showSection("logged_in");
+      document.getElementById("current_user").textContent = name;
+      updateCount();
+    };
+    list.appendChild(btn);
+  }
+}
+
+// --- ✅ SIGN UP NEW PERSON ---
+async function signUp() {
+  let name = document.getElementById("new_name").value.trim();
+  if (!name) { alert("❌ Enter your name first!"); return; }
+
+  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+  if (all[name]) { alert("❌ This name is ALREADY signed up!"); return; }
+
+  // Create account — empty fingerprints
+  all[name] = { fps: [] };
+  localStorage.setItem("all_users", JSON.stringify(all));
+  localStorage.setItem("current_user", name);
+  alert(`✅ SIGN UP SUCCESS!\nWelcome: ${name}\nNow save your 5 fingerprints`);
+  document.getElementById("new_name").value = "";
+  updateUserList();
+  showSection("logged_in");
+  updateCount();
+}
+
+// --- ✅ SAVE 1 FINGERPRINT (DO 5 TIMES) ---
+async function saveFinger() {
+  let user = localStorage.getItem("current_user");
+  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+  if (!all[user]) return;
+
+  if (all[user].fps.length >= 5) {
+    alert("✅ YOU HAVE SAVED ALL 5 FINGERS ALREADY!");
+    return;
+  }
+
+  try {
+    const cred = await navigator.credentials.create({
+      publicKey: {
+        challenge: new Uint8Array(16),
+        rp: { name: "Canada-fingerprint-link", id: location.hostname },
+        user: { id: new Uint8Array(16), name: user, displayName: user },
+        pubKeyCredParams: [ {type:"public-key", alg:-7}, {type:"public-key", alg:-257} ],
+        authenticatorSelection: { userVerification:"required", requireResidentKey: false },
+        timeout: 60000
+      }
+    });
+    let idStr = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
+    all[user].fps.push(idStr);
+    localStorage.setItem("all_users", JSON.stringify(all));
+    updateCount();
+    updateUserList();
+    alert(`✅ Fingerprint saved!\n${all[user].fps.length} / 5`);
+  } catch(e) { alert("❌ Failed: " + e.message); }
+}
+
+// --- ✅ LOGIN: ONLY YOUR FINGERS WORK ---
+async function login() {
+  let user = localStorage.getItem("current_user");
+  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+  if (!all[user] || all[user].fps.length === 0) {
+    alert("❌ Save 5 fingerprints first!");
+    return;
+  }
+
+  try {
+    let allowed = all[user].fps.map(id => ({
+      type: "public-key",
+      id: Uint8Array.from(atob(id), c=>c.charCodeAt(0))
+    }));
+
+    await navigator.credentials.get({
+      publicKey: {
+        challenge: new Uint8Array(16),
+        userVerification:"required",
+        allowCredentials: allowed,
+        timeout: 60000
+      }
+    });
+
+    alert("✅ LOGIN SUCCESS!\nCorrect fingerprint ✅\nOpening canada.com...");
+    window.location.href = MY_LINK;
+  } catch(e) { alert("❌ WRONG FINGERPRINT OR NOT YOURS!\nCANNOT LOGIN!"); }
+}
+
+// --- ✅ LOGOUT ---
+function logout() {
+  localStorage.removeItem("current_user");
+  showSection("welcome");
+  updateUserList();
+}
+
+// --- UPDATE COUNT ---
+function updateCount() {
+  let user = localStorage.getItem("current_user");
+  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+  document.getElementById("count").textContent = all[user]?.fps.length || 0;
+}
+</script>
+<style>
+body{background:#111;color:#fff;text-align:center;padding-top:40px;font-family:Arial;}
+.box{background:#222;padding:25px;border-radius:12px;margin:auto;max-width:340px;margin-bottom:15px;}
+input{width:90%;padding:12px;font-size:16px;border-radius:6px;border:none;margin-bottom:12px;}
+button{border:none;color:white;padding:13px 20px;font-size:16px;border-radius:8px;width:100%;margin:5px 0;}
+.btn-main{background:#d50000;}
+.btn-sec{background:#444;}
+.btn-sm{background:#333;font-size:13px;padding:6px 10px;margin:3px;}
+h2{margin:0 0 12px 0;font-size:18px;}
+.note{color:#aaa;font-size:14px;}
+</style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Biometric System</h2>
-    
-    <div id="setupSection">
-        <input type="text" id="username" placeholder="Enter Username" style="width:94%; padding:10px; margin-bottom:10px;">
-        <button onclick="registerUser()">1. CREATE ACCOUNT</button>
-    </div>
-
-    <div id="actionSection" style="display:none;">
-        <p>User: <span id="currentUser"></span></p>
-        <p>Fingers Scanned: <span id="count" class="registered">0</span> / 5</p>
-        <button id="regBtn" onclick="enrollFinger()">ADD UNIQUE FINGER</button>
-        <hr>
-        <button style="background: #28a745;" onclick="login()">LOGIN (Verify Finger)</button>
-    </div>
-
-    <div class="status" id="status">Ready.</div>
+<!-- === WELCOME / SIGN UP SCREEN === -->
+<div id="sec_welcome" class="sec box">
+<h2>📝 SIGN UP | ALL USERS</h2>
+<div id="user_list"></div>
+<br>
+<input type="text" id="new_name" placeholder="Enter your name...">
+<button class="btn-main" onclick="signUp()">➕ SIGN UP NEW PERSON</button>
 </div>
 
-<script>
-    let userDb = {
-        name: "",
-        ids: [] // Stores the unique hardware IDs of the fingers
-    };
+<!-- === LOGIN SCREEN === -->
+<div id="sec_logged_in" class="sec box" style="display:none;">
+<h2>👤 USER: <span id="current_user"></span></h2>
+<p class="note">Fingerprints saved: <span id="count">0</span> / 5</p>
 
-    function updateStatus(msg) {
-        document.getElementById('status').innerText = msg;
-    }
+<button class="btn-main" onclick="saveFinger()">✋ SAVE 1 FINGERPRINT</button>
+<button class="btn-main" onclick="login()">👉 LOGIN WITH FINGERPRINT</button>
 
-    // STEP 1: Sign Up
-    function registerUser() {
-        const name = document.getElementById('username').value;
-        if (!name) return alert("Enter a name");
-        
-        userDb.name = name;
-        document.getElementById('currentUser').innerText = name;
-        document.getElementById('setupSection').style.display = 'none';
-        document.getElementById('actionSection').style.display = 'block';
-        updateStatus("Account created. Now add 5 unique fingers.");
-    }
-
-    // STEP 2: Enroll 5 Unique Fingers
-    async function enrollFinger() {
-        if (userDb.ids.length >= 5) {
-            updateStatus("All 5 fingers registered. You can now login.");
-            return;
-        }
-
-        updateStatus("Waiting for biometric sensor...");
-
-        try {
-            // This triggers the actual Fingerprint/FaceID popup
-            const challenge = new Uint8Array(32);
-            window.crypto.getRandomValues(challenge);
-
-            const credential = await navigator.credentials.create({
-                publicKey: {
-                    challenge: challenge,
-                    rp: { name: "Biometric App" },
-                    user: {
-                        id: Uint8Array.from(userDb.name, c => c.charCodeAt(0)),
-                        name: userDb.name,
-                        displayName: userDb.name
-                    },
-                    pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-                    authenticatorSelection: { authenticatorAttachment: "platform" }
-                }
-            });
-
-            // Check if this finger (credential ID) is already in our list
-            const newId = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)));
-            
-            if (userDb.ids.includes(newId)) {
-                updateStatus("❌ REJECTED: This finger is already saved! Use a different one.");
-                alert("Duplicate finger detected. Use a different finger.");
-            } else {
-                userDb.ids.push(newId);
-                document.getElementById('count').innerText = userDb.ids.length;
-                updateStatus("✅ Success: Finger " + userDb.ids.length + " saved.");
-            }
-
-        } catch (err) {
-            updateStatus("Error: " + err.message);
-        }
-    }
-
-    // STEP 3: Login
-    async function login() {
-        if (userDb.ids.length < 5) {
-            alert("Please register all 5 fingers first!");
-            return;
-        }
-
-        updateStatus("Verifying identity...");
-
-        try {
-            const challenge = new Uint8Array(32);
-            window.crypto.getRandomValues(challenge);
-
-            const assertion = await navigator.credentials.get({
-                publicKey: {
-                    challenge: challenge,
-                    allowCredentials: userDb.ids.map(id => ({
-                        id: Uint8Array.from(atob(id), c => c.charCodeAt(0)),
-                        type: 'public-key'
-                    }))
-                }
-            });
-
-            if (assertion) {
-                alert("LOGIN SUCCESSFUL!");
-                window.location.href = "https://www.canada.ca";
-            }
-        } catch (err) {
-            updateStatus("Login Failed: " + err.message);
-        }
-    }
-</script>
+<button class="btn-sec" onclick="logout()">🔄 LOGOUT / BACK</button>
+</div>
 
 </body>
 </html>
