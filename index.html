@@ -1,180 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🔐 Canada-fingerprint-link</title>
-<script>
-// ✅ YOUR FINAL LINK ✅
-const MY_LINK = "https://canada.com";
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canada Secure Biometrics</title>
+    <style>
+        :root {
+            --primary: #00f2ff;
+            --success: #00ff88;
+            --error: #ff4b2b;
+            --bg: #0a0a0c;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
 
-window.onload = function() {
-  updateUserList();
-  let current = localStorage.getItem("current_user");
-  if (current) {
-    showSection("logged_in");
-    document.getElementById("current_user").textContent = current;
-    updateCount();
-  } else {
-    showSection("welcome");
-  }
-};
+        body {
+            background: radial-gradient(circle at center, #1a1a2e 0%, var(--bg) 100%);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-// --- SWITCH SCREENS ---
-function showSection(name) {
-  document.querySelectorAll(".sec").forEach(s => s.style.display = "none");
-  document.getElementById("sec_"+name).style.display = "block";
-}
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 35px;
+            width: 360px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
 
-// --- SHOW ALL REGISTERED PEOPLE ---
-function updateUserList() {
-  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
-  let list = document.getElementById("user_list");
-  list.innerHTML = "";
-  if (Object.keys(all).length === 0) {
-    list.innerHTML = "<p class='note'>No one signed up yet</p>";
-    return;
-  }
-  for (let name in all) {
-    let btn = document.createElement("button");
-    btn.className = "btn-sm";
-    btn.textContent = `👤 ${name} (${all[name].fps.length}/5)`;
-    btn.onclick = () => {
-      localStorage.setItem("current_user", name);
-      showSection("logged_in");
-      document.getElementById("current_user").textContent = name;
-      updateCount();
-    };
-    list.appendChild(btn);
-  }
-}
+        h2 { font-weight: 300; letter-spacing: 1px; margin-bottom: 20px; font-size: 20px; }
+        
+        .input-group { margin-bottom: 20px; }
+        input {
+            width: 85%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.2);
+            color: white;
+            outline: none;
+            text-align: center;
+        }
 
-// --- ✅ SIGN UP NEW PERSON ---
-async function signUp() {
-  let name = document.getElementById("new_name").value.trim();
-  if (!name) { alert("❌ Enter your name first!"); return; }
+        .btn {
+            border: none;
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            width: 100%;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 8px 0;
+            transition: 0.3s;
+        }
 
-  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
-  if (all[name]) { alert("❌ This name is ALREADY signed up!"); return; }
+        .btn-reg { background: linear-gradient(135deg, #ff416c, #ff4b2b); }
+        .btn-save { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
+        .btn-login { background: linear-gradient(135deg, #00f2ff, #00ff88); color: #000; }
+        .btn-back { background: transparent; color: #888; font-size: 13px; }
 
-  // Create account — empty fingerprints
-  all[name] = { fps: [] };
-  localStorage.setItem("all_users", JSON.stringify(all));
-  localStorage.setItem("current_user", name);
-  alert(`✅ SIGN UP SUCCESS!\nWelcome: ${name}\nNow save your 5 fingerprints`);
-  document.getElementById("new_name").value = "";
-  updateUserList();
-  showSection("logged_in");
-  updateCount();
-}
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
 
-// --- ✅ SAVE 1 FINGERPRINT (DO 5 TIMES) ---
-async function saveFinger() {
-  let user = localStorage.getItem("current_user");
-  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
-  if (!all[user]) return;
+        /* Fingerprint Progress Grid */
+        .finger-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
 
-  if (all[user].fps.length >= 5) {
-    alert("✅ YOU HAVE SAVED ALL 5 FINGERS ALREADY!");
-    return;
-  }
+        .slot {
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: 0.4s;
+        }
 
-  try {
-    const cred = await navigator.credentials.create({
-      publicKey: {
-        challenge: new Uint8Array(16),
-        rp: { name: "Canada-fingerprint-link", id: location.hostname },
-        user: { id: new Uint8Array(16), name: user, displayName: user },
-        pubKeyCredParams: [ {type:"public-key", alg:-7}, {type:"public-key", alg:-257} ],
-        authenticatorSelection: { userVerification:"required", requireResidentKey: false },
-        timeout: 60000
-      }
-    });
-    let idStr = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
-    all[user].fps.push(idStr);
-    localStorage.setItem("all_users", JSON.stringify(all));
-    updateCount();
-    updateUserList();
-    alert(`✅ Fingerprint saved!\n${all[user].fps.length} / 5`);
-  } catch(e) { alert("❌ Failed: " + e.message); }
-}
+        .slot.active {
+            background: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+            color: #000;
+            border: none;
+        }
 
-// --- ✅ LOGIN: ONLY YOUR FINGERS WORK ---
-async function login() {
-  let user = localStorage.getItem("current_user");
-  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
-  if (!all[user] || all[user].fps.length === 0) {
-    alert("❌ Save 5 fingerprints first!");
-    return;
-  }
+        .user-list {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
 
-  try {
-    let allowed = all[user].fps.map(id => ({
-      type: "public-key",
-      id: Uint8Array.from(atob(id), c=>c.charCodeAt(0))
-    }));
+        .user-item {
+            background: rgba(255,255,255,0.05);
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
 
-    await navigator.credentials.get({
-      publicKey: {
-        challenge: new Uint8Array(16),
-        userVerification:"required",
-        allowCredentials: allowed,
-        timeout: 60000
-      }
-    });
-
-    alert("✅ LOGIN SUCCESS!\nCorrect fingerprint ✅\nOpening canada.com...");
-    window.location.href = MY_LINK;
-  } catch(e) { alert("❌ WRONG FINGERPRINT OR NOT YOURS!\nCANNOT LOGIN!"); }
-}
-
-// --- ✅ LOGOUT ---
-function logout() {
-  localStorage.removeItem("current_user");
-  showSection("welcome");
-  updateUserList();
-}
-
-// --- UPDATE COUNT ---
-function updateCount() {
-  let user = localStorage.getItem("current_user");
-  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
-  document.getElementById("count").textContent = all[user]?.fps.length || 0;
-}
-</script>
-<style>
-body{background:#111;color:#fff;text-align:center;padding-top:40px;font-family:Arial;}
-.box{background:#222;padding:25px;border-radius:12px;margin:auto;max-width:340px;margin-bottom:15px;}
-input{width:90%;padding:12px;font-size:16px;border-radius:6px;border:none;margin-bottom:12px;}
-button{border:none;color:white;padding:13px 20px;font-size:16px;border-radius:8px;width:100%;margin:5px 0;}
-.btn-main{background:#d50000;}
-.btn-sec{background:#444;}
-.btn-sm{background:#333;font-size:13px;padding:6px 10px;margin:3px;}
-h2{margin:0 0 12px 0;font-size:18px;}
-.note{color:#aaa;font-size:14px;}
-</style>
+        .status-text { font-size: 12px; color: #aaa; margin-top: 10px; }
+    </style>
 </head>
 <body>
 
-<!-- === WELCOME / SIGN UP SCREEN === -->
-<div id="sec_welcome" class="sec box">
-<h2>📝 SIGN UP | ALL USERS</h2>
-<div id="user_list"></div>
-<br>
-<input type="text" id="new_name" placeholder="Enter your name...">
-<button class="btn-main" onclick="signUp()">➕ SIGN UP NEW PERSON</button>
+<div class="container">
+    <!-- SCREEN 1: WELCOME / SIGN UP -->
+    <div id="sec_welcome" class="sec">
+        <h2>📝 Register</h2>
+        <div class="user-list" id="user_list"></div>
+        <div class="input-group">
+            <input type="text" id="new_name" placeholder="Enter Full Name">
+        </div>
+        <button class="btn btn-reg" onclick="signUp()">➕ CREATE ACCOUNT</button>
+    </div>
+
+    <!-- SCREEN 2: LOGGED IN / DASHBOARD -->
+    <div id="sec_logged_in" class="sec" style="display:none;">
+        <div style="font-size: 12px; color: var(--primary); letter-spacing: 2px;">SECURE SESSION</div>
+        <h2 id="current_user_display">👤 User</h2>
+        
+        <div class="finger-grid" id="fingerGrid">
+            <div class="slot" id="s1">1</div>
+            <div class="slot" id="s2">2</div>
+            <div class="slot" id="s3">3</div>
+            <div class="slot" id="s4">4</div>
+            <div class="slot" id="s5">5</div>
+        </div>
+
+        <button class="btn btn-save" id="btnSave" onclick="saveFinger()">✋ SCAN UNIQUE FINGER</button>
+        <button class="btn btn-login" onclick="login()">👉 VERIFY & LOGIN</button>
+        <button class="btn btn-back" onclick="logout()">🔄 SWITCH USER</button>
+        
+        <div class="status-text" id="statusMsg">Ready to secure your identity.</div>
+    </div>
 </div>
 
-<!-- === LOGIN SCREEN === -->
-<div id="sec_logged_in" class="sec box" style="display:none;">
-<h2>👤 USER: <span id="current_user"></span></h2>
-<p class="note">Fingerprints saved: <span id="count">0</span> / 5</p>
+<script>
+const MY_LINK = "https://canada.com";
 
-<button class="btn-main" onclick="saveFinger()">✋ SAVE 1 FINGERPRINT</button>
-<button class="btn-main" onclick="login()">👉 LOGIN WITH FINGERPRINT</button>
+window.onload = function() {
+    updateUserList();
+    let current = localStorage.getItem("current_user");
+    if (current) {
+        openDashboard(current);
+    }
+};
 
-<button class="btn-sec" onclick="logout()">🔄 LOGOUT / BACK</button>
-</div>
+function showSection(name) {
+    document.querySelectorAll(".sec").forEach(s => s.style.display = "none");
+    document.getElementById("sec_"+name).style.display = "block";
+}
 
+function updateUserList() {
+    let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+    let list = document.getElementById("user_list");
+    list.innerHTML = "";
+    if (Object.keys(all).length === 0) {
+        list.innerHTML = "<div style='padding:10px; color:#666;'>No active users</div>";
+        return;
+    }
+    for (let name in all) {
+        let div = document.createElement("div");
+        div.className = "user-item";
+        div.textContent = `👤 ${name} (${all[name].fps.length}/5)`;
+        div.onclick = () => openDashboard(name);
+        list.appendChild(div);
+    }
+}
+
+function openDashboard(name) {
+    localStorage.setItem("current_user", name);
+    document.getElementById("current_user_display").textContent = "👤 " + name;
+    showSection("logged_in");
+    updateUI();
+}
+
+async function signUp() {
+    let name = document.getElementById("new_name").value.trim();
+    if (!name) { alert("Please enter a name"); return; }
+    let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+    if (all[name]) { alert("Name already exists"); return; }
+    
+    all[name] = { fps: [] };
+    localStorage.setItem("all_users", JSON.stringify(all));
+    openDashboard(name);
+}
+
+async function saveFinger() {
+    let user = localStorage.getItem("current_user");
+    let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+    if (all[user].fps.length >= 5) return alert("All 5 fingers saved!");
+
+    try {
+        const cred = await navigator.credentials.create({
+            publicKey: {
+                challenge: new Uint8Array(16),
+                rp: { name: "Canada Secure", id: location.hostname },
+                user: { id: new Uint8Array(16), name: user, displayName: user },
+                pubKeyCredParams: [{type:"public-key", alg:-7}],
+                authenticatorSelection: { userVerification:"required" },
+                timeout: 60000
+            }
+        });
+
+        let idStr = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
+        
+        // SMART CHECK: Check if this specific finger ID already exists
+        if (all[user].fps.includes(idStr)) {
+            document.getElementById("statusMsg").innerText = "❌ DUPLICATE FINGER DETECTED!";
+            document.getElementById("statusMsg").style.color = "var(--error)";
+            return;
+        }
+
+        all[user].fps.push(idStr);
+        localStorage.setItem("all_users", JSON.stringify(all));
+        updateUI();
+        document.getElementById("statusMsg").innerText = "✅ Finger " + all[user].fps.length + " Saved";
+        document.getElementById("statusMsg").style.color = "var(--success)";
+    } catch(e) { console.error(e); }
+}
+
+async function login() {
+    let user = localStorage.getItem("current_user");
+    let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+    if (all[user].fps.length < 5) { alert("Save 5 different fingers first!"); return; }
+
+    try {
+        let allowed = all[user].fps.map(id => ({
+            type: "public-key",
+            id: Uint8Array.from(atob(id), c=>c.charCodeAt(0))
+        }));
+
+        await navigator.credentials.get({
+            publicKey: { challenge: new Uint8Array(16), allowCredentials: allowed }
+        });
+
+        alert("ACCESS GRANTED");
+        window.location.href = MY_LINK;
+    } catch(e) { alert("Verification Failed!"); }
+}
+
+function updateUI() {
+    let user = localStorage.getItem("current_user");
+    let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+    let count = all[user].fps.length;
+    
+    // Update Finger dots
+    for (let i = 1; i <= 5; i++) {
+        let slot = document.getElementById("s" + i);
+        if (i <= count) {
+            slot.classList.add("active");
+            slot.textContent = "✔";
+        } else {
+            slot.classList.remove("active");
+            slot.textContent = i;
+        }
+    }
+}
+
+function logout() {
+    localStorage.removeItem("current_user");
+    showSection("welcome");
+    updateUserList();
+}
+</script>
 </body>
 </html>
