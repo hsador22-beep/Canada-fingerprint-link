@@ -5,93 +5,176 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🔐 Canada-fingerprint-link</title>
 <script>
-// ✅ YOUR LINK: CANADA.COM ✅
+// ✅ YOUR FINAL LINK ✅
 const MY_LINK = "https://canada.com";
 
 window.onload = function() {
-  let saved = JSON.parse(localStorage.getItem("fp_list") || "[]");
-  document.getElementById("status").textContent = 
-    saved.length === 0 ? "⚠️ First: Register up to 5 fingerprints" : 
-    `✅ Saved: ${saved.length}/5 fingerprints`;
-  document.getElementById("btn").textContent = 
-    saved.length < 5 ? "👉 REGISTER NEW FINGERPRINT" : "👉 VERIFY & OPEN LINK";
+  updateUserList();
+  let current = localStorage.getItem("current_user");
+  if (current) {
+    showSection("logged_in");
+    document.getElementById("current_user").textContent = current;
+    updateCount();
+  } else {
+    showSection("welcome");
+  }
 };
 
-async function registerFP() {
-  let saved = JSON.parse(localStorage.getItem("fp_list") || "[]");
-  if (saved.length >= 5) { alert("❌ MAX 5 fingerprints already saved!"); return; }
+// --- SWITCH SCREENS ---
+function showSection(name) {
+  document.querySelectorAll(".sec").forEach(s => s.style.display = "none");
+  document.getElementById("sec_"+name).style.display = "block";
+}
+
+// --- SHOW ALL REGISTERED PEOPLE ---
+function updateUserList() {
+  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+  let list = document.getElementById("user_list");
+  list.innerHTML = "";
+  if (Object.keys(all).length === 0) {
+    list.innerHTML = "<p class='note'>No one signed up yet</p>";
+    return;
+  }
+  for (let name in all) {
+    let btn = document.createElement("button");
+    btn.className = "btn-sm";
+    btn.textContent = `👤 ${name} (${all[name].fps.length}/5)`;
+    btn.onclick = () => {
+      localStorage.setItem("current_user", name);
+      showSection("logged_in");
+      document.getElementById("current_user").textContent = name;
+      updateCount();
+    };
+    list.appendChild(btn);
+  }
+}
+
+// --- ✅ SIGN UP NEW PERSON ---
+async function signUp() {
+  let name = document.getElementById("new_name").value.trim();
+  if (!name) { alert("❌ Enter your name first!"); return; }
+
+  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+  if (all[name]) { alert("❌ This name is ALREADY signed up!"); return; }
+
+  // Create account — empty fingerprints
+  all[name] = { fps: [] };
+  localStorage.setItem("all_users", JSON.stringify(all));
+  localStorage.setItem("current_user", name);
+  alert(`✅ SIGN UP SUCCESS!\nWelcome: ${name}\nNow save your 5 fingerprints`);
+  document.getElementById("new_name").value = "";
+  updateUserList();
+  showSection("logged_in");
+  updateCount();
+}
+
+// --- ✅ SAVE 1 FINGERPRINT (DO 5 TIMES) ---
+async function saveFinger() {
+  let user = localStorage.getItem("current_user");
+  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+  if (!all[user]) return;
+
+  if (all[user].fps.length >= 5) {
+    alert("✅ YOU HAVE SAVED ALL 5 FINGERS ALREADY!");
+    return;
+  }
 
   try {
     const cred = await navigator.credentials.create({
       publicKey: {
         challenge: new Uint8Array(16),
         rp: { name: "Canada-fingerprint-link", id: location.hostname },
-        user: {
-          id: new Uint8Array(16),
-          name: `user${saved.length+1}`,
-          displayName: `Fingerprint ${saved.length+1}`
-        },
+        user: { id: new Uint8Array(16), name: user, displayName: user },
         pubKeyCredParams: [ {type:"public-key", alg:-7}, {type:"public-key", alg:-257} ],
         authenticatorSelection: { userVerification:"required", requireResidentKey: false },
         timeout: 60000
       }
     });
     let idStr = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
-    saved.push(idStr);
-    localStorage.setItem("fp_list", JSON.stringify(saved));
-    alert(`✅ SUCCESS! Fingerprint ${saved.length} Registered!\nRemaining: ${5 - saved.length}`);
-    location.reload();
-  } catch(e) { alert("❌ Error: " + e.message); }
+    all[user].fps.push(idStr);
+    localStorage.setItem("all_users", JSON.stringify(all));
+    updateCount();
+    updateUserList();
+    alert(`✅ Fingerprint saved!\n${all[user].fps.length} / 5`);
+  } catch(e) { alert("❌ Failed: " + e.message); }
 }
 
-async function verifyFP() {
-  let saved = JSON.parse(localStorage.getItem("fp_list") || "[]");
-  if (saved.length === 0) { alert("❌ No fingerprints saved!"); return; }
+// --- ✅ LOGIN: ONLY YOUR FINGERS WORK ---
+async function login() {
+  let user = localStorage.getItem("current_user");
+  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+  if (!all[user] || all[user].fps.length === 0) {
+    alert("❌ Save 5 fingerprints first!");
+    return;
+  }
 
   try {
-    let allowList = saved.map(idStr => ({
+    let allowed = all[user].fps.map(id => ({
       type: "public-key",
-      id: Uint8Array.from(atob(idStr), c=>c.charCodeAt(0))
+      id: Uint8Array.from(atob(id), c=>c.charCodeAt(0))
     }));
 
     await navigator.credentials.get({
       publicKey: {
         challenge: new Uint8Array(16),
         userVerification:"required",
-        allowCredentials: allowList,
+        allowCredentials: allowed,
         timeout: 60000
       }
     });
-    alert("✅ CORRECT FINGERPRINT! Opening canada.com...");
+
+    alert("✅ LOGIN SUCCESS!\nCorrect fingerprint ✅\nOpening canada.com...");
     window.location.href = MY_LINK;
-  } catch(e) { alert("❌ WRONG or CANCELED"); }
+  } catch(e) { alert("❌ WRONG FINGERPRINT OR NOT YOURS!\nCANNOT LOGIN!"); }
 }
 
-function doAction() {
-  let saved = JSON.parse(localStorage.getItem("fp_list") || "[]");
-  saved.length < 5 ? registerFP() : verifyFP();
+// --- ✅ LOGOUT ---
+function logout() {
+  localStorage.removeItem("current_user");
+  showSection("welcome");
+  updateUserList();
 }
-function switchMode() {
-  let btn = document.getElementById("btn");
-  btn.textContent = btn.textContent.includes("OPEN") 
-    ? "👉 REGISTER MORE" 
-    : "👉 VERIFY & OPEN";
+
+// --- UPDATE COUNT ---
+function updateCount() {
+  let user = localStorage.getItem("current_user");
+  let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+  document.getElementById("count").textContent = all[user]?.fps.length || 0;
 }
 </script>
 <style>
-body{background:#111;color:#fff;text-align:center;padding-top:50px;font-family:Arial;}
-.box{background:#222;padding:25px;border-radius:12px;margin:auto;max-width:320px;}
-button{background:#d50000;border:none;color:white;padding:14px 25px;font-size:17px;border-radius:8px;width:100%;margin:10px 0;}
-.sec{background:#444;font-size:13px;padding:8px;border-radius:6px;}
-#status{color:#ccc;font-size:15px;margin-bottom:15px;}
+body{background:#111;color:#fff;text-align:center;padding-top:40px;font-family:Arial;}
+.box{background:#222;padding:25px;border-radius:12px;margin:auto;max-width:340px;margin-bottom:15px;}
+input{width:90%;padding:12px;font-size:16px;border-radius:6px;border:none;margin-bottom:12px;}
+button{border:none;color:white;padding:13px 20px;font-size:16px;border-radius:8px;width:100%;margin:5px 0;}
+.btn-main{background:#d50000;}
+.btn-sec{background:#444;}
+.btn-sm{background:#333;font-size:13px;padding:6px 10px;margin:3px;}
+h2{margin:0 0 12px 0;font-size:18px;}
+.note{color:#aaa;font-size:14px;}
 </style>
 </head>
 <body>
-<div class="box">
-<h1>🔐 Canada-fingerprint-link</h1>
-<p id="status"></p>
-<button id="btn" onclick="doAction()"></button>
-<button class="sec" onclick="switchMode()">🔄 SWITCH MODE</button>
+
+<!-- === WELCOME / SIGN UP SCREEN === -->
+<div id="sec_welcome" class="sec box">
+<h2>📝 SIGN UP | ALL USERS</h2>
+<div id="user_list"></div>
+<br>
+<input type="text" id="new_name" placeholder="Enter your name...">
+<button class="btn-main" onclick="signUp()">➕ SIGN UP NEW PERSON</button>
 </div>
+
+<!-- === LOGIN SCREEN === -->
+<div id="sec_logged_in" class="sec box" style="display:none;">
+<h2>👤 USER: <span id="current_user"></span></h2>
+<p class="note">Fingerprints saved: <span id="count">0</span> / 5</p>
+
+<button class="btn-main" onclick="saveFinger()">✋ SAVE 1 FINGERPRINT</button>
+<button class="btn-main" onclick="login()">👉 LOGIN WITH FINGERPRINT</button>
+
+<button class="btn-sec" onclick="logout()">🔄 LOGOUT / BACK</button>
+</div>
+
 </body>
 </html>
