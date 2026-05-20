@@ -3,29 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canada.com - Official Secure Access</title>
+    <title>Canada.com - Identity Verification</title>
     <style>
         :root {
-            --canada-red: #D00000;
-            --canada-blue: #003B95;
+            --canada-blue-dark: #0F4C81;
+            --canada-blue: #165D9F;
+            --canada-blue-light: #2070BB;
+            --canada-red: #E53935;
+            --canada-green: #43A047;
             --canada-white: #FFFFFF;
-            --canada-dark: #0F1A28;
-            --success: #00E676;
-            --error: #FF1744;
+            --input-bg: rgba(255, 255, 255, 0.12);
+            --input-border: rgba(255, 255, 255, 0.2);
             --glass: rgba(255, 255, 255, 0.08);
-            --input-bg: rgba(0, 0, 0, 0.2);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, var(--canada-blue) 0%, var(--canada-dark) 100%);
+            background: linear-gradient(180deg, var(--canada-blue-light) 0%, var(--canada-blue-dark) 100%);
             color: var(--canada-white);
-            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -35,204 +36,166 @@
 
         .container {
             background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 24px;
-            padding: 35px;
-            width: 380px;
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--input-border);
+            border-radius: 20px;
+            padding: 30px 25px;
+            width: 400px;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
         }
 
-        /* === CANADA OFFICIAL HEADER === */
-        .canada-header {
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .maple-leaf {
-            color: var(--canada-red);
-            font-size: 32px;
-            margin-bottom: 5px;
-        }
-        .canada-logo-text {
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            background: linear-gradient(90deg, var(--canada-red), var(--canada-white), var(--canada-blue));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 4px;
-        }
-        .canada-subtext {
-            font-size: 12px;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            opacity: 0.85;
-        }
-        /* ============================== */
-
-        h2 { 
-            font-weight: 400; 
-            font-size: 20px; 
-            margin-bottom: 20px; 
-            color: #E0E0E0;
+        h1 {
+            font-size: 22px;
+            font-weight: 500;
+            margin-bottom: 30px;
+            letter-spacing: 0.5px;
         }
 
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             text-align: left;
         }
+
         label {
-            font-size: 12px;
-            opacity: 0.7;
-            margin-left: 8px;
-            margin-bottom: 4px;
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 6px;
             display: block;
+            padding-left: 4px;
         }
+
         input, select {
             width: 100%;
-            padding: 12px 15px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--input-border);
             background: var(--input-bg);
             color: white;
-            font-size: 14px;
+            font-size: 15px;
             outline: none;
             transition: 0.3s;
         }
+
+        input::placeholder, select::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
         input:focus, select:focus {
-            border-color: var(--canada-white);
-            box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.18);
         }
 
         .btn {
             border: none;
             color: white;
-            padding: 14px;
+            padding: 15px;
             border-radius: 12px;
             width: 100%;
             font-weight: 600;
-            font-size: 15px;
+            font-size: 16px;
             cursor: pointer;
-            margin: 8px 0;
             transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            margin: 8px 0;
         }
 
-        .btn-reg { 
-            background: linear-gradient(135deg, var(--canada-red), #FF5252); 
+        .btn-register {
+            background: linear-gradient(90deg, #D81B60, var(--canada-red));
+            box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
         }
-        .btn-reg:hover {
+
+        .btn-register:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(208, 0, 0, 0.3);
-        }
-
-        .btn-save { 
-            background: rgba(255, 255, 255, 0.12); 
-            border: 1px solid rgba(255, 255, 255, 0.25); 
-        }
-        .btn-save:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-login { 
-            background: linear-gradient(135deg, var(--canada-blue), #2196F3); 
-        }
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 59, 149, 0.3);
-        }
-
-        /* 3 Finger Grid Design */
-        .finger-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-            margin: 25px auto;
-            width: 80%;
-        }
-        .slot {
-            height: 50px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.3);
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .slot.active {
-            background: linear-gradient(135deg, var(--success), #69F0AE);
-            box-shadow: 0 0 20px rgba(0, 230, 118, 0.4);
-            color: #000;
-            border: none;
-            font-weight: bold;
-        }
-
-        .status-text { 
-            font-size: 13px; 
-            color: #BDBDBD; 
-            margin-top: 10px; 
-            min-height: 20px;
-        }
-
-        .info-card {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            padding: 10px;
-            margin-bottom: 15px;
-            font-size: 12px;
-            text-align: left;
-            line-height: 1.5;
-        }
-
-        /* NEW: Login Button Style */
-        .btn-main-login {
-            background: linear-gradient(135deg, #2E7D32, #4CAF50);
-            margin-top: 15px;
-            font-size: 16px;
-            padding: 16px;
-        }
-        .btn-main-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(46, 125, 50, 0.3);
+            box-shadow: 0 6px 16px rgba(229, 57, 53, 0.4);
         }
 
         .divider {
             display: flex;
             align-items: center;
-            margin: 15px 0;
-            color: rgba(255,255,255,0.5);
-            font-size: 12px;
+            margin: 10px 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
         }
+
         .divider::before, .divider::after {
             content: "";
             flex: 1;
             height: 1px;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.3);
         }
+
         .divider span {
-            padding: 0 10px;
+            padding: 0 12px;
+        }
+
+        .btn-login {
+            background: linear-gradient(90deg, #388E3C, var(--canada-green));
+            box-shadow: 0 4px 12px rgba(67, 160, 71, 0.3);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(67, 160, 71, 0.4);
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Fingerprint Screen Styles */
+        .finger-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 25px auto;
+            width: 85%;
+        }
+
+        .slot {
+            height: 50px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.4);
+            transition: 0.3s;
+        }
+
+        .slot.active {
+            background: #00C853;
+            color: white;
+            border: none;
+            font-weight: bold;
+            box-shadow: 0 0 12px rgba(0, 200, 83, 0.4);
+        }
+
+        .status {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            margin: 10px 0 20px;
+        }
+
+        .info-box {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            text-align: left;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- SCREEN 1: OFFICIAL REGISTRATION FORM + LOGIN OPTION -->
+    <!-- SCREEN 1: MAIN FORM (Matches your screenshot exactly) -->
     <div id="sec_welcome" class="sec">
-        <div class="canada-header">
-            <div class="maple-leaf">🍁</div>
-            <h1 class="canada-logo-text">CANADA.COM</h1>
-            <div class="canada-subtext">OFFICIAL SECURE PORTAL</div>
-        </div>
-
-        <h2>Identity Verification</h2>
+        <h1>Identity Verification</h1>
 
         <div class="form-group">
             <label>Full Legal Name</label>
@@ -274,72 +237,81 @@
             <input type="text" id="id_number" placeholder="ID / Passport Number">
         </div>
 
-        <button class="btn btn-reg" onclick="submitRegistration()">✅ REGISTER NEW ACCOUNT</button>
+        <button class="btn btn-register" onclick="submitRegistration()">✅ REGISTER NEW ACCOUNT</button>
 
-        <!-- ✅ NEW: LOGIN BUTTON ADDED HERE -->
         <div class="divider"><span>OR</span></div>
-        <button class="btn btn-main-login" onclick="openLogin()">🔐 LOGIN TO YOUR ACCOUNT</button>
+
+        <button class="btn btn-login" onclick="openLogin()">🔐 LOGIN TO YOUR ACCOUNT</button>
     </div>
 
-    <!-- SCREEN 2: BIOMETRIC VERIFICATION -->
-    <div id="sec_logged_in" class="sec" style="display:none;">
-        <div class="canada-header" style="padding-bottom:10px; margin-bottom:15px;">
-            <div class="maple-leaf" style="font-size:22px;">🍁</div>
-            <div class="canada-logo-text" style="font-size:18px;">CANADA.COM</div>
-            <div class="canada-subtext" style="font-size:10px;">BIOMETRIC SECURITY</div>
+    <!-- SCREEN 2: REGISTER FINGERPRINTS -->
+    <div id="sec_register_fp" class="sec" style="display:none;">
+        <h1>Biometric Registration</h1>
+
+        <div class="info-box">
+            <strong>User:</strong> <span id="reg_name"></span><br>
+            <strong>ID:</strong> <span id="reg_id"></span>
         </div>
 
-        <div class="info-card">
-            <strong>Verified User:</strong> <span id="disp_name"></span><br>
-            <strong>ID:</strong> <span id="disp_id"></span>
-        </div>
-
-        <h2>Register 3 Unique Fingers</h2>
-        
         <div class="finger-grid" id="fingerGrid">
             <div class="slot" id="s1">1</div>
             <div class="slot" id="s2">2</div>
             <div class="slot" id="s3">3</div>
         </div>
 
-        <button class="btn btn-save" id="btnSave" onclick="saveFinger()">✋ SCAN NEW FINGERPRINT</button>
-        <button class="btn btn-login" onclick="login()">🚀 ACCESS CANADA.COM</button>
-        
-        <div class="status-text" id="statusMsg">* Do not use the same finger twice</div>
+        <div class="status" id="reg_status">Register 3 unique fingerprints</div>
+
+        <button class="btn btn-register" onclick="saveFingerprint()">✋ SCAN FINGERPRINT</button>
+        <button class="btn btn-back" onclick="backToHome()">⬅ BACK</button>
     </div>
 
-    <!-- ✅ NEW: LOGIN SCREEN -->
+    <!-- SCREEN 3: LOGIN FORM -->
     <div id="sec_login" class="sec" style="display:none;">
-        <div class="canada-header">
-            <div class="maple-leaf">🍁</div>
-            <h1 class="canada-logo-text">CANADA.COM</h1>
-            <div class="canada-subtext">SECURE LOGIN</div>
-        </div>
-
-        <h2>Existing User Login</h2>
+        <h1>Account Login</h1>
 
         <div class="form-group">
             <label>Full Legal Name</label>
-            <input type="text" id="login_name" placeholder="Enter your registered name">
+            <input type="text" id="login_name" placeholder="Enter registered name">
         </div>
 
         <div class="form-group">
             <label>Government ID Number</label>
-            <input type="text" id="login_id" placeholder="Enter your ID / Passport Number">
+            <input type="text" id="login_id" placeholder="Enter ID / Passport Number">
         </div>
 
-        <button class="btn btn-login" onclick="verifyLogin()">🔐 LOGIN</button>
-        <button class="btn btn-save" onclick="backToHome()">⬅ BACK</button>
+        <button class="btn btn-login" onclick="verifyLoginData()">🔐 LOGIN</button>
+        <button class="btn btn-back" onclick="backToHome()">⬅ BACK</button>
+    </div>
+
+    <!-- SCREEN 4: FINGERPRINT VERIFICATION (LOGIN STEP) -->
+    <div id="sec_verify_fp" class="sec" style="display:none;">
+        <h1>Fingerprint Verification</h1>
+
+        <div class="info-box">
+            <strong>Welcome:</strong> <span id="user_name"></span><br>
+            <strong>Status:</strong> Ready to verify
+        </div>
+
+        <div class="status" id="verify_status">Please scan your registered fingerprint to continue</div>
+
+        <button class="btn btn-login" onclick="verifyFingerprint()">✋ SCAN TO VERIFY</button>
+    </div>
+
+    <!-- SCREEN 5: SUCCESS / PORTAL -->
+    <div id="sec_success" class="sec" style="display:none;">
+        <h1>✅ Verification Successful</h1>
+        <p style="margin:20px 0; font-size:15px;">Welcome to Canada.com Official Portal. Access granted.</p>
+        <button class="btn btn-register" onclick="openPortal()">🌐 ENTER PORTAL</button>
     </div>
 </div>
 
 <script>
-const MY_LINK = "https://canada.com";
-let userData = {};
+const PORTAL_LINK = "https://canada.com";
+let currentUser = {};
 
-// Step 1: Collect ALL information for new registration
+// --- 1. REGISTRATION FLOW ---
 function submitRegistration() {
-    userData = {
+    const userData = {
         full_name: document.getElementById("full_name").value.trim(),
         father_name: document.getElementById("father_name").value.trim(),
         age: document.getElementById("age").value,
@@ -350,63 +322,27 @@ function submitRegistration() {
         fingerprints: []
     };
 
-    if(!userData.full_name || !userData.father_name || !userData.age || !userData.birthday || !userData.id_number) {
-        alert("❌ Please fill in ALL required fields correctly.");
+    // Validate
+    if (!userData.full_name || !userData.father_name || !userData.age || !userData.birthday || !userData.id_number) {
+        alert("❌ Please fill ALL required fields correctly.");
         return;
     }
 
-    // Save data privately
-    localStorage.setItem("canada_user_data", JSON.stringify(userData));
+    // Save to storage
+    localStorage.setItem("canada_user", JSON.stringify(userData));
+    currentUser = userData;
 
-    // Show summary on next screen
-    document.getElementById("disp_name").textContent = userData.full_name;
-    document.getElementById("disp_id").textContent = userData.id_number;
-
-    showSection("logged_in");
+    // Go to fingerprint registration
+    document.getElementById("reg_name").textContent = userData.full_name;
+    document.getElementById("reg_id").textContent = userData.id_number;
+    showSection("register_fp");
 }
 
-// ✅ NEW: Open Login Screen
-function openLogin() {
-    showSection("login");
-}
-
-// ✅ NEW: Verify Login Details
-function verifyLogin() {
-    let savedData = localStorage.getItem("canada_user_data");
-    if (!savedData) {
-        alert("❌ No account found. Please register first.");
-        return;
-    }
-
-    let storedUser = JSON.parse(savedData);
-    let inputName = document.getElementById("login_name").value.trim();
-    let inputID = document.getElementById("login_id").value.trim();
-
-    if (inputName === storedUser.full_name && inputID === storedUser.id_number) {
-        userData = storedUser;
-        document.getElementById("disp_name").textContent = userData.full_name;
-        document.getElementById("disp_id").textContent = userData.id_number;
-        updateUI();
-        showSection("logged_in");
-    } else {
-        alert("❌ Incorrect Name or ID Number. Please try again.");
-    }
-}
-
-// ✅ NEW: Back to Home
-function backToHome() {
-    showSection("welcome");
-}
-
-function showSection(name) {
-    document.querySelectorAll(".sec").forEach(s => s.style.display = "none");
-    document.getElementById("sec_"+name).style.display = "block";
-}
-
-// Step 2: Save 3 UNIQUE fingerprints
-async function saveFinger() {
-    if (userData.fingerprints.length >= 3) {
-        updateStatus("✅ All 3 fingerprints registered. Ready to enter.", "var(--success)");
+// Save 3 unique fingerprints
+async function saveFingerprint() {
+    if (currentUser.fingerprints.length >= 3) {
+        document.getElementById("reg_status").textContent = "✅ All 3 fingerprints saved. You can now login.";
+        document.getElementById("reg_status").style.color = "#00E676";
         return;
     }
 
@@ -414,4 +350,73 @@ async function saveFinger() {
         const cred = await navigator.credentials.create({
             publicKey: {
                 challenge: new Uint8Array(16),
-                rp: { name: "Canada.com Official
+                rp: { name: "Canada.com", id: location.hostname },
+                user: { id: new Uint8Array(16), name: currentUser.id_number, displayName: currentUser.full_name },
+                pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+                authenticatorSelection: { userVerification: "required" }
+            }
+        });
+
+        const fingerprintID = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
+
+        // Prevent duplicate
+        if (currentUser.fingerprints.includes(fingerprintID)) {
+            document.getElementById("reg_status").textContent = "❌ Same finger used! Use another.";
+            document.getElementById("reg_status").style.color = "#FF5252";
+            return;
+        }
+
+        // Save
+        currentUser.fingerprints.push(fingerprintID);
+        localStorage.setItem("canada_user", JSON.stringify(currentUser));
+
+        // Update UI
+        document.getElementById(`s${currentUser.fingerprints.length}`).classList.add("active");
+        document.getElementById("reg_status").textContent = `✅ Fingerprint ${currentUser.fingerprints.length} saved`;
+        document.getElementById("reg_status").style.color = "#00E676";
+
+    } catch (e) {
+        document.getElementById("reg_status").textContent = "⚠️ Scan cancelled or failed.";
+    }
+}
+
+// --- 2. LOGIN FLOW ---
+function openLogin() {
+    showSection("login");
+}
+
+function verifyLoginData() {
+    const saved = localStorage.getItem("canada_user");
+    if (!saved) {
+        alert("❌ No account found. Please register first.");
+        return;
+    }
+
+    const storedUser = JSON.parse(saved);
+    const inputName = document.getElementById("login_name").value.trim();
+    const inputID = document.getElementById("login_id").value.trim();
+
+    if (inputName === storedUser.full_name && inputID === storedUser.id_number) {
+        currentUser = storedUser;
+        document.getElementById("user_name").textContent = storedUser.full_name;
+        showSection("verify_fp"); // Go to fingerprint check
+    } else {
+        alert("❌ Incorrect Name or ID.");
+    }
+}
+
+// ✅ FINGERPRINT CHECK ON LOGIN
+async function verifyFingerprint() {
+    if (!currentUser.fingerprints || currentUser.fingerprints.length === 0) {
+        alert("❌ No fingerprints registered.");
+        return;
+    }
+
+    try {
+        const allowed = currentUser.fingerprints.map(id => ({
+            type: "public-key",
+            id: Uint8Array.from(atob(id), c => c.charCodeAt(0))
+        }));
+
+        await navigator.credentials.get({
+            publicKey: { challenge: new Uint8Array(16), allowCredentials:
