@@ -3,351 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canada.com - Official Secure Access</title>
+    <title>Canada Secure Biometrics</title>
     <style>
         :root {
             --canada-red: #D00000;
-            --canada-blue: #003B95;
             --canada-white: #FFFFFF;
-            --canada-dark: #0F1A28;
-            --success: #00E676;
-            --error: #FF1744;
+            --canada-dark: #1E2A38;
+            --success: #00ff88;
+            --error: #ff4b2b;
+            --bg: #0F1A28;
             --glass: rgba(255, 255, 255, 0.08);
-            --input-bg: rgba(0, 0, 0, 0.2);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
 
         body {
-            background: linear-gradient(135deg, var(--canada-blue) 0%, var(--canada-dark) 100%);
-            color: var(--canada-white);
-            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: radial-gradient(circle at center, #253B54 0%, var(--bg) 100%);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
+            height: 100vh;
+            margin: 0;
         }
 
         .container {
             background: var(--glass);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 24px;
-            padding: 35px;
-            width: 380px;
+            padding: 40px;
+            width: 360px;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            transition: all 0.5s ease;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
 
-        /* === CANADA OFFICIAL HEADER === */
+        /* === CANADA HEADER STYLE === */
         .canada-header {
             margin-bottom: 25px;
             padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .canada-logo-text {
+            color: var(--canada-white);
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        .canada-subtext {
+            color: var(--canada-white);
+            opacity: 0.8;
+            font-size: 12px;
+            letter-spacing: 2px;
+            margin-top: 4px;
         }
         .maple-leaf {
             color: var(--canada-red);
-            font-size: 32px;
-            margin-bottom: 5px;
-            animation: pulse 2s infinite;
+            font-size: 28px;
+            font-weight: bold;
         }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        .canada-logo-text {
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            background: linear-gradient(90deg, var(--canada-red), var(--canada-white), var(--canada-blue));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 4px;
-        }
-        .canada-subtext {
-            font-size: 12px;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            opacity: 0.85;
-        }
-        /* ============================== */
+        /* =========================== */
 
-        h2 { 
-            font-weight: 400; 
-            font-size: 20px; 
-            margin-bottom: 20px; 
-            color: #E0E0E0;
-        }
 
-        .form-group {
-            margin-bottom: 12px;
-            text-align: left;
-        }
-        label {
-            font-size: 12px;
-            opacity: 0.7;
-            margin-left: 8px;
-            margin-bottom: 4px;
-            display: block;
-        }
-        input, select {
-            width: 100%;
-            padding: 12px 15px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: var(--input-bg);
+        h2 { font-weight: 300; letter-spacing: 1px; margin-bottom: 30px; font-size: 22px; }
+        
+        input {
+            width: 85%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.2);
             color: white;
-            font-size: 14px;
             outline: none;
-            transition: 0.3s;
-        }
-        input:focus, select:focus {
-            border-color: var(--canada-white);
-            box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
+            text-align: center;
+            margin-bottom: 20px;
         }
 
         .btn {
             border: none;
             color: white;
-            padding: 14px;
-            border-radius: 12px;
+            padding: 16px;
+            border-radius: 14px;
             width: 100%;
             font-weight: 600;
-            font-size: 15px;
             cursor: pointer;
             margin: 8px 0;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            transition: 0.3s;
         }
 
         .btn-reg { 
-            background: linear-gradient(135deg, var(--canada-red), #FF5252); 
+            background: linear-gradient(135deg, var(--canada-red), #FF4E4E); 
         }
-        .btn-reg:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(208, 0, 0, 0.3);
-        }
-
         .btn-save { 
-            background: rgba(255, 255, 255, 0.12); 
-            border: 1px solid rgba(255, 255, 255, 0.25); 
+            background: rgba(255,255,255,0.1); 
+            border: 1px solid rgba(255,255,255,0.2); 
         }
-        .btn-save:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
         .btn-login { 
-            background: linear-gradient(135deg, var(--canada-blue), #2196F3); 
-        }
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 59, 149, 0.3);
+            background: linear-gradient(135deg, #42a5f5, #00c6ff); 
+            color: #000; 
+            margin-top: 15px;
         }
 
-        /* 3 Finger Grid Design */
+        .btn:hover { transform: translateY(-2px); opacity: 0.95; }
+
+        /* 3 Finger Grid */
         .finger-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-            margin: 25px auto;
-            width: 80%;
+            gap: 15px;
+            margin: 30px auto;
+            width: 70%;
         }
+
         .slot {
-            height: 50px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            height: 45px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.3);
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 14px;
+            color: rgba(255,255,255,0.3);
+            transition: 0.4s;
         }
+
         .slot.active {
-            background: linear-gradient(135deg, var(--success), #69F0AE);
-            box-shadow: 0 0 20px rgba(0, 230, 118, 0.4);
+            background: linear-gradient(135deg, #42a5f5, #00c6ff);
+            box-shadow: 0 0 15px #42a5f5;
             color: #000;
             border: none;
-            font-weight: bold;
         }
 
-        .status-text { 
-            font-size: 13px; 
-            color: #BDBDBD; 
-            margin-top: 10px; 
-            min-height: 20px;
-        }
-
-        .info-card {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            padding: 10px;
-            margin-bottom: 15px;
-            font-size: 12px;
-            text-align: left;
-            line-height: 1.5;
-        }
-
-        /* === BEAUTIFUL PORTAL SCREEN === */
-        #portal_screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 50%, #e1e8ed 100%);
-            color: var(--canada-dark);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            animation: fadeIn 1s ease;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .portal-logo {
-            font-size: 50px;
-            font-weight: 900;
-            background: linear-gradient(90deg, var(--canada-red), var(--canada-blue));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 10px;
-        }
-        .portal-leaf {
-            font-size: 80px;
-            color: var(--canada-red);
-            filter: drop-shadow(0 0 15px rgba(208, 0, 0, 0.4));
-        }
-        .portal-title {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: 2px;
-        }
-        .portal-sub {
-            font-size: 14px;
-            color: #666;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin-bottom: 30px;
-        }
-        .portal-line {
-            width: 120px;
-            height: 4px;
-            background: linear-gradient(90deg, var(--canada-red), var(--canada-blue));
-            border-radius: 2px;
-            margin-bottom: 30px;
-        }
-        .portal-text {
-            font-size: 16px;
-            color: #444;
-            margin-bottom: 40px;
-            text-align: center;
-            padding: 0 20px;
-        }
-        .portal-btn {
-            background: linear-gradient(135deg, var(--canada-blue), #005b96);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 8px 25px rgba(0, 59, 149, 0.3);
-            transition: all 0.3s;
-        }
-        .portal-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 12px 30px rgba(0, 59, 149, 0.4);
-        }
+        .status-text { font-size: 13px; color: #aaa; margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- SCREEN 1: OFFICIAL REGISTRATION FORM -->
+    <!-- SCREEN 1: FRONT PAGE WITH CANADA MATERIAL -->
     <div id="sec_welcome" class="sec">
         <div class="canada-header">
             <div class="maple-leaf">🍁</div>
             <h1 class="canada-logo-text">CANADA.COM</h1>
-            <div class="canada-subtext">OFFICIAL SECURE PORTAL</div>
+            <div class="canada-subtext">OFFICIAL SECURE ACCESS</div>
         </div>
 
-        <h2>Identity Verification Form</h2>
-
-        <div class="form-group">
-            <label>Full Legal Name</label>
-            <input type="text" id="full_name" placeholder="Enter your full name">
-        </div>
-
-        <div class="form-group">
-            <label>Father's Name</label>
-            <input type="text" id="father_name" placeholder="Enter father's name">
-        </div>
-
-        <div class="form-group">
-            <label>Age</label>
-            <input type="number" id="age" placeholder="Your age" min="1" max="120">
-        </div>
-
-        <div class="form-group">
-            <label>Date of Birth</label>
-            <input type="date" id="birthday">
-        </div>
-
-        <div class="form-group">
-            <label>Gender</label>
-            <select id="gender">
-                <option value="">-- Select Gender --</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Residential Address</label>
-            <input type="text" id="address" placeholder="City, Province, Postal Code">
-        </div>
-
-        <div class="form-group">
-            <label>Government ID Number</label>
-            <input type="text" id="id_number" placeholder="ID / Passport Number">
-        </div>
-
-        <button class="btn btn-reg" onclick="submitRegistration()">✅ SUBMIT & CONTINUE</button>
+        <h2>Sign In / Register</h2>
+        <input type="text" id="new_name" placeholder="Enter Your Identity">
+        <button class="btn btn-reg" onclick="signUp()">➕ START SECURE ACCESS</button>
     </div>
 
-    <!-- SCREEN 2: BIOMETRIC VERIFICATION -->
+    <!-- SCREEN 2: DASHBOARD (3 FINGERS) -->
     <div id="sec_logged_in" class="sec" style="display:none;">
-        <div class="canada-header" style="padding-bottom:10px; margin-bottom:15px;">
-            <div class="maple-leaf" style="font-size:22px;">🍁</div>
-            <div class="canada-logo-text" style="font-size:18px;">CANADA.COM</div>
-            <div class="canada-subtext" style="font-size:10px;">BIOMETRIC SECURITY</div>
+        <div class="canada-header" style="margin-bottom:15px; padding-bottom:10px;">
+            <div class="maple-leaf" style="font-size:20px;">🍁</div>
+            <div class="canada-logo-text" style="font-size:16px;">CANADA.COM</div>
         </div>
 
-        <div class="info-card">
-            <strong>Verified User:</strong> <span id="disp_name"></span><br>
-            <strong>ID:</strong> <span id="disp_id"></span>
-        </div>
-
-        <h2>Register 3 Unique Fingers</h2>
+        <div style="font-size: 10px; color: #42a5f5; letter-spacing: 3px;">BIOMETRIC VERIFICATION</div>
+        <h2 id="current_user_display">Secure User</h2>
         
         <div class="finger-grid" id="fingerGrid">
             <div class="slot" id="s1">1</div>
@@ -355,51 +170,117 @@
             <div class="slot" id="s3">3</div>
         </div>
 
-        <button class="btn btn-save" id="btnSave" onclick="saveFinger()">✋ SCAN NEW FINGERPRINT</button>
-        <button class="btn btn-login" onclick="login()">🚀 ACCESS CANADA.COM</button>
+        <button class="btn btn-save" id="btnSave" onclick="saveFinger()">✋ SAVE UNIQUE FINGER</button>
+        <button class="btn btn-login" onclick="login()">👉 UNLOCK CANADA PORTAL</button>
         
-        <div class="status-text" id="statusMsg">* Do not use the same finger twice</div>
+        <div class="status-text" id="statusMsg">Scan 3 different fingers to activate.</div>
     </div>
-</div>
-
-<!-- ✅ BEAUTIFUL OFFICIAL PORTAL SCREEN -->
-<div id="portal_screen">
-    <div class="portal-leaf">🍁</div>
-    <div class="portal-logo">canada.com</div>
-    <div class="portal-title">OFFICIAL PORTAL</div>
-    <div class="portal-sub">Secure • Trusted • Official</div>
-    <div class="portal-line"></div>
-    <div class="portal-text">Welcome to Canada.com<br>Your gateway to official information and services</div>
-    <button class="portal-btn" onclick="window.location.href='https://canada.com'">ENTER PORTAL</button>
 </div>
 
 <script>
 const MY_LINK = "https://canada.com";
-let userData = {};
 
-// Step 1: Collect ALL information
-function submitRegistration() {
-    // Get all values
-    userData = {
-        full_name: document.getElementById("full_name").value.trim(),
-        father_name: document.getElementById("father_name").value.trim(),
-        age: document.getElementById("age").value,
-        birthday: document.getElementById("birthday").value,
-        gender: document.getElementById("gender").value,
-        address: document.getElementById("address").value.trim(),
-        id_number: document.getElementById("id_number").value.trim(),
-        fingerprints: [] // store unique finger IDs here
-    };
+async function signUp() {
+    let name = document.getElementById("new_name").value.trim();
+    if (!name) return;
+    
+    let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+    if (!all[name]) {
+        all[name] = { fps: [] };
+        localStorage.setItem("all_users", JSON.stringify(all));
+    }
+    
+    localStorage.setItem("current_user", name);
+    document.getElementById("current_user_display").textContent = name;
+    showSection("logged_in");
+    updateUI();
+}
 
-    // Basic validation
-    if(!userData.full_name || !userData.father_name || !userData.age || !userData.birthday || !userData.id_number) {
-        alert("❌ Please fill in ALL required fields correctly.");
+function showSection(name) {
+    document.querySelectorAll(".sec").forEach(s => s.style.display = "none");
+    document.getElementById("sec_"+name).style.display = "block";
+}
+
+async function saveFinger() {
+    let user = localStorage.getItem("current_user");
+    let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+    
+    // LIMIT = 3 FINGERS
+    if (all[user].fps.length >= 3) {
+        document.getElementById("statusMsg").innerText = "✅ All 3 fingers registered!";
+        document.getElementById("statusMsg").style.color = "var(--success)";
         return;
     }
 
-    // Save data privately (NOT shown on front page list)
-    localStorage.setItem("canada_user_data", JSON.stringify(userData));
+    try {
+        const cred = await navigator.credentials.create({
+            publicKey: {
+                challenge: new Uint8Array(16),
+                rp: { name: "Canada Secure", id: location.hostname },
+                user: { id: new Uint8Array(16), name: user, displayName: user },
+                pubKeyCredParams: [{type:"public-key", alg:-7}],
+                authenticatorSelection: { userVerification:"required" }
+            }
+        });
 
-    // Show summary on next screen
-    document.getElementById("disp_name").textContent = userData.full_name;
-   
+        let idStr = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
+        
+        // PREVENT DUPLICATE
+        if (all[user].fps.includes(idStr)) {
+            let msg = document.getElementById("statusMsg");
+            msg.innerText = "❌ SAME FINGER USED! USE ANOTHER.";
+            msg.style.color = "var(--error)";
+            return;
+        }
+
+        all[user].fps.push(idStr);
+        localStorage.setItem("all_users", JSON.stringify(all));
+        updateUI();
+        document.getElementById("statusMsg").innerText = "✅ Finger " + all[user].fps.length + " Saved";
+        document.getElementById("statusMsg").style.color = "var(--success)";
+        
+    } catch(e) { console.error(e); }
+}
+
+async function login() {
+    let user = localStorage.getItem("current_user");
+    let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+    
+    // REQUIRE 3 UNIQUE FINGERS
+    if (all[user].fps.length < 3) { 
+        alert("⚠️ You must save 3 unique fingers first!"); 
+        return; 
+    }
+
+    try {
+        let allowed = all[user].fps.map(id => ({
+            type: "public-key",
+            id: Uint8Array.from(atob(id), c=>c.charCodeAt(0))
+        }));
+
+        await navigator.credentials.get({
+            publicKey: { challenge: new Uint8Array(16), allowCredentials: allowed }
+        });
+
+        alert("✅ VERIFIED! WELCOME TO CANADA.COM");
+        window.location.href = MY_LINK;
+    } catch(e) { alert("❌ VERIFICATION FAILED. FINGERPRINT NOT RECOGNIZED."); }
+}
+
+function updateUI() {
+    let user = localStorage.getItem("current_user");
+    let all = JSON.parse(localStorage.getItem("all_users") || "{}");
+    let count = all[user]?.fps.length || 0;
+    
+    // UPDATE ONLY 3 SLOTS
+    for (let i = 1; i <= 3; i++) {
+        let slot = document.getElementById("s" + i);
+        if (i <= count) {
+            slot.classList.add("active");
+            slot.textContent = "✔";
+        }
+    }
+}
+</script>
+</body>
+</html>
