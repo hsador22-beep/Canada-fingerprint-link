@@ -190,12 +190,41 @@
             text-align: left;
             line-height: 1.5;
         }
+
+        /* NEW: Login Button Style */
+        .btn-main-login {
+            background: linear-gradient(135deg, #2E7D32, #4CAF50);
+            margin-top: 15px;
+            font-size: 16px;
+            padding: 16px;
+        }
+        .btn-main-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(46, 125, 50, 0.3);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+        }
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.2);
+        }
+        .divider span {
+            padding: 0 10px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- SCREEN 1: OFFICIAL REGISTRATION FORM -->
+    <!-- SCREEN 1: OFFICIAL REGISTRATION FORM + LOGIN OPTION -->
     <div id="sec_welcome" class="sec">
         <div class="canada-header">
             <div class="maple-leaf">🍁</div>
@@ -203,7 +232,7 @@
             <div class="canada-subtext">OFFICIAL SECURE PORTAL</div>
         </div>
 
-        <h2>Identity Verification Form</h2>
+        <h2>Identity Verification</h2>
 
         <div class="form-group">
             <label>Full Legal Name</label>
@@ -245,7 +274,11 @@
             <input type="text" id="id_number" placeholder="ID / Passport Number">
         </div>
 
-        <button class="btn btn-reg" onclick="submitRegistration()">✅ SUBMIT & CONTINUE</button>
+        <button class="btn btn-reg" onclick="submitRegistration()">✅ REGISTER NEW ACCOUNT</button>
+
+        <!-- ✅ NEW: LOGIN BUTTON ADDED HERE -->
+        <div class="divider"><span>OR</span></div>
+        <button class="btn btn-main-login" onclick="openLogin()">🔐 LOGIN TO YOUR ACCOUNT</button>
     </div>
 
     <!-- SCREEN 2: BIOMETRIC VERIFICATION -->
@@ -274,15 +307,38 @@
         
         <div class="status-text" id="statusMsg">* Do not use the same finger twice</div>
     </div>
+
+    <!-- ✅ NEW: LOGIN SCREEN -->
+    <div id="sec_login" class="sec" style="display:none;">
+        <div class="canada-header">
+            <div class="maple-leaf">🍁</div>
+            <h1 class="canada-logo-text">CANADA.COM</h1>
+            <div class="canada-subtext">SECURE LOGIN</div>
+        </div>
+
+        <h2>Existing User Login</h2>
+
+        <div class="form-group">
+            <label>Full Legal Name</label>
+            <input type="text" id="login_name" placeholder="Enter your registered name">
+        </div>
+
+        <div class="form-group">
+            <label>Government ID Number</label>
+            <input type="text" id="login_id" placeholder="Enter your ID / Passport Number">
+        </div>
+
+        <button class="btn btn-login" onclick="verifyLogin()">🔐 LOGIN</button>
+        <button class="btn btn-save" onclick="backToHome()">⬅ BACK</button>
+    </div>
 </div>
 
 <script>
 const MY_LINK = "https://canada.com";
 let userData = {};
 
-// Step 1: Collect ALL information
+// Step 1: Collect ALL information for new registration
 function submitRegistration() {
-    // Get all values
     userData = {
         full_name: document.getElementById("full_name").value.trim(),
         father_name: document.getElementById("father_name").value.trim(),
@@ -291,24 +347,55 @@ function submitRegistration() {
         gender: document.getElementById("gender").value,
         address: document.getElementById("address").value.trim(),
         id_number: document.getElementById("id_number").value.trim(),
-        fingerprints: [] // store unique finger IDs here
+        fingerprints: []
     };
 
-    // Basic validation
     if(!userData.full_name || !userData.father_name || !userData.age || !userData.birthday || !userData.id_number) {
         alert("❌ Please fill in ALL required fields correctly.");
         return;
     }
 
-    // Save data privately (NOT shown on front page list)
+    // Save data privately
     localStorage.setItem("canada_user_data", JSON.stringify(userData));
 
     // Show summary on next screen
     document.getElementById("disp_name").textContent = userData.full_name;
     document.getElementById("disp_id").textContent = userData.id_number;
 
-    // Move to fingerprint screen
     showSection("logged_in");
+}
+
+// ✅ NEW: Open Login Screen
+function openLogin() {
+    showSection("login");
+}
+
+// ✅ NEW: Verify Login Details
+function verifyLogin() {
+    let savedData = localStorage.getItem("canada_user_data");
+    if (!savedData) {
+        alert("❌ No account found. Please register first.");
+        return;
+    }
+
+    let storedUser = JSON.parse(savedData);
+    let inputName = document.getElementById("login_name").value.trim();
+    let inputID = document.getElementById("login_id").value.trim();
+
+    if (inputName === storedUser.full_name && inputID === storedUser.id_number) {
+        userData = storedUser;
+        document.getElementById("disp_name").textContent = userData.full_name;
+        document.getElementById("disp_id").textContent = userData.id_number;
+        updateUI();
+        showSection("logged_in");
+    } else {
+        alert("❌ Incorrect Name or ID Number. Please try again.");
+    }
+}
+
+// ✅ NEW: Back to Home
+function backToHome() {
+    showSection("welcome");
 }
 
 function showSection(name) {
@@ -327,82 +414,4 @@ async function saveFinger() {
         const cred = await navigator.credentials.create({
             publicKey: {
                 challenge: new Uint8Array(16),
-                rp: { name: "Canada.com Official", id: location.hostname },
-                user: { 
-                    id: new Uint8Array(16), 
-                    name: userData.id_number, 
-                    displayName: userData.full_name 
-                },
-                pubKeyCredParams: [{type:"public-key", alg:-7}],
-                authenticatorSelection: { userVerification:"required" }
-            }
-        });
-
-        let idStr = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
-        
-        // ✅ CHECK: PREVENT DUPLICATE FINGERS
-        if (userData.fingerprints.includes(idStr)) {
-            updateStatus("❌ DUPLICATE! Use a DIFFERENT finger.", "var(--error)");
-            return;
-        }
-
-        // ✅ Save unique finger
-        userData.fingerprints.push(idStr);
-        localStorage.setItem("canada_user_data", JSON.stringify(userData));
-        
-        updateUI();
-        updateStatus("✅ Fingerprint " + userData.fingerprints.length + " Saved", "var(--success)");
-
-    } catch(e) { 
-        updateStatus("⚠️ Scan cancelled or failed.", "#888");
-    }
-}
-
-// Step 3: Login & Go to Canada.com
-async function login() {
-    if (userData.fingerprints.length < 3) { 
-        alert("⚠️ You MUST register 3 unique fingerprints first to unlock access."); 
-        return; 
-    }
-
-    try {
-        let allowed = userData.fingerprints.map(id => ({
-            type: "public-key",
-            id: Uint8Array.from(atob(id), c=>c.charCodeAt(0))
-        }));
-
-        await navigator.credentials.get({
-            publicKey: { 
-                challenge: new Uint8Array(16), 
-                allowCredentials: allowed,
-                userVerification: "required"
-            }
-        });
-
-        alert("✅ VERIFICATION SUCCESSFUL\nWelcome to Canada.com Official Portal");
-        window.location.href = MY_LINK;
-
-    } catch(e) { 
-        alert("❌ ACCESS DENIED\nFingerprint does not match records."); 
-    }
-}
-
-function updateUI() {
-    let count = userData.fingerprints.length;
-    for (let i = 1; i <= 3; i++) {
-        let slot = document.getElementById("s" + i);
-        if (i <= count) {
-            slot.classList.add("active");
-            slot.textContent = "✔";
-        }
-    }
-}
-
-function updateStatus(text, color) {
-    const m = document.getElementById("statusMsg");
-    m.innerText = text;
-    m.style.color = color;
-}
-</script>
-</body>
-</html>
+                rp: { name: "Canada.com Official
