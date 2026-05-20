@@ -244,7 +244,7 @@
         <button class="btn btn-login" onclick="openLogin()">🔐 LOGIN TO YOUR ACCOUNT</button>
     </div>
 
-    <!-- SCREEN 2: REGISTER FINGERPRINTS -->
+    <!-- SCREEN 2: REGISTER FINGERPRINTS (Only after register) -->
     <div id="sec_register_fp" class="sec" style="display:none;">
         <h1>Biometric Registration</h1>
 
@@ -283,24 +283,24 @@
         <button class="btn btn-back" onclick="backToHome()">⬅ BACK</button>
     </div>
 
-    <!-- SCREEN 4: FINGERPRINT VERIFICATION (LOGIN STEP) -->
+    <!-- SCREEN 4: FINGERPRINT VERIFICATION (Login Step) -->
     <div id="sec_verify_fp" class="sec" style="display:none;">
         <h1>Fingerprint Verification</h1>
 
         <div class="info-box">
             <strong>Welcome:</strong> <span id="user_name"></span><br>
-            <strong>Status:</strong> Ready to verify
+            <strong>Status:</strong> Scan registered fingerprint
         </div>
 
-        <div class="status" id="verify_status">Please scan your registered fingerprint to continue</div>
+        <div class="status" id="verify_status">Please scan your fingerprint to continue</div>
 
-        <button class="btn btn-login" onclick="verifyFingerprint()">✋ SCAN TO VERIFY</button>
+        <button class="btn btn-login" onclick="checkRegisteredFingerprint()">✋ SCAN TO VERIFY</button>
     </div>
 
     <!-- SCREEN 5: SUCCESS / PORTAL -->
     <div id="sec_success" class="sec" style="display:none;">
         <h1>✅ Verification Successful</h1>
-        <p style="margin:20px 0; font-size:15px;">Welcome to Canada.com Official Portal. Access granted.</p>
+        <p style="margin:20px 0; font-size:15px;">Fingerprint matched! Access granted to Canada.com</p>
         <button class="btn btn-register" onclick="openPortal()">🌐 ENTER PORTAL</button>
     </div>
 </div>
@@ -319,29 +319,29 @@ function submitRegistration() {
         gender: document.getElementById("gender").value,
         address: document.getElementById("address").value.trim(),
         id_number: document.getElementById("id_number").value.trim(),
-        fingerprints: []
+        fingerprints: [] // Save fingerprints HERE during registration
     };
 
-    // Validate
+    // Validate all fields
     if (!userData.full_name || !userData.father_name || !userData.age || !userData.birthday || !userData.id_number) {
         alert("❌ Please fill ALL required fields correctly.");
         return;
     }
 
-    // Save to storage
+    // Save full user data to browser storage
     localStorage.setItem("canada_user", JSON.stringify(userData));
     currentUser = userData;
 
-    // Go to fingerprint registration
+    // Go to fingerprint registration screen
     document.getElementById("reg_name").textContent = userData.full_name;
     document.getElementById("reg_id").textContent = userData.id_number;
     showSection("register_fp");
 }
 
-// Save 3 unique fingerprints
+// Save 3 UNIQUE fingerprints during registration
 async function saveFingerprint() {
     if (currentUser.fingerprints.length >= 3) {
-        document.getElementById("reg_status").textContent = "✅ All 3 fingerprints saved. You can now login.";
+        document.getElementById("reg_status").textContent = "✅ All 3 fingerprints saved. Registration complete! You can now Login.";
         document.getElementById("reg_status").style.color = "#00E676";
         return;
     }
@@ -359,64 +359,54 @@ async function saveFingerprint() {
 
         const fingerprintID = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
 
-        // Prevent duplicate
+        // Prevent duplicate fingers
         if (currentUser.fingerprints.includes(fingerprintID)) {
-            document.getElementById("reg_status").textContent = "❌ Same finger used! Use another.";
+            document.getElementById("reg_status").textContent = "❌ Same finger used! Use another unique finger.";
             document.getElementById("reg_status").style.color = "#FF5252";
             return;
         }
 
-        // Save
+        // ✅ Save fingerprint to user's record
         currentUser.fingerprints.push(fingerprintID);
         localStorage.setItem("canada_user", JSON.stringify(currentUser));
 
         // Update UI
         document.getElementById(`s${currentUser.fingerprints.length}`).classList.add("active");
-        document.getElementById("reg_status").textContent = `✅ Fingerprint ${currentUser.fingerprints.length} saved`;
+        document.getElementById("reg_status").textContent = `✅ Fingerprint ${currentUser.fingerprints.length} registered successfully`;
         document.getElementById("reg_status").style.color = "#00E676";
 
     } catch (e) {
-        document.getElementById("reg_status").textContent = "⚠️ Scan cancelled or failed.";
+        document.getElementById("reg_status").textContent = "⚠️ Scan cancelled or failed. Try again.";
     }
 }
 
 // --- 2. LOGIN FLOW ---
 function openLogin() {
+    // First check: if no account exists, block login
+    const saved = localStorage.getItem("canada_user");
+    if (!saved) {
+        alert("❌ No account found! You must REGISTER first before login.");
+        return;
+    }
     showSection("login");
 }
 
 function verifyLoginData() {
     const saved = localStorage.getItem("canada_user");
-    if (!saved) {
-        alert("❌ No account found. Please register first.");
-        return;
-    }
-
     const storedUser = JSON.parse(saved);
+
     const inputName = document.getElementById("login_name").value.trim();
     const inputID = document.getElementById("login_id").value.trim();
 
+    // Check if name & ID match registered account
     if (inputName === storedUser.full_name && inputID === storedUser.id_number) {
+        // ✅ Data correct → go to fingerprint check
         currentUser = storedUser;
         document.getElementById("user_name").textContent = storedUser.full_name;
-        showSection("verify_fp"); // Go to fingerprint check
+        showSection("verify_fp");
     } else {
-        alert("❌ Incorrect Name or ID.");
+        alert("❌ Name or ID does NOT match registered account.");
     }
 }
 
-// ✅ FINGERPRINT CHECK ON LOGIN
-async function verifyFingerprint() {
-    if (!currentUser.fingerprints || currentUser.fingerprints.length === 0) {
-        alert("❌ No fingerprints registered.");
-        return;
-    }
-
-    try {
-        const allowed = currentUser.fingerprints.map(id => ({
-            type: "public-key",
-            id: Uint8Array.from(atob(id), c => c.charCodeAt(0))
-        }));
-
-        await navigator.credentials.get({
-            publicKey: { challenge: new Uint8Array(16), allowCredentials:
+// ✅ MAIN CHECK: Verify if fingerprint is REGISTERED or NOT
