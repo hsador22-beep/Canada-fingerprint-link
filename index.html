@@ -31,6 +31,7 @@
             align-items: center;
             min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
         }
 
         .container {
@@ -42,6 +43,7 @@
             width: 380px;
             text-align: center;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: all 0.5s ease;
         }
 
         /* === CANADA OFFICIAL HEADER === */
@@ -54,6 +56,12 @@
             color: var(--canada-red);
             font-size: 32px;
             margin-bottom: 5px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
         .canada-logo-text {
             font-size: 26px;
@@ -190,6 +198,84 @@
             text-align: left;
             line-height: 1.5;
         }
+
+        /* === BEAUTIFUL PORTAL SCREEN === */
+        #portal_screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 50%, #e1e8ed 100%);
+            color: var(--canada-dark);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 1s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .portal-logo {
+            font-size: 50px;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--canada-red), var(--canada-blue));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        .portal-leaf {
+            font-size: 80px;
+            color: var(--canada-red);
+            filter: drop-shadow(0 0 15px rgba(208, 0, 0, 0.4));
+        }
+        .portal-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+        .portal-sub {
+            font-size: 14px;
+            color: #666;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
+        .portal-line {
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--canada-red), var(--canada-blue));
+            border-radius: 2px;
+            margin-bottom: 30px;
+        }
+        .portal-text {
+            font-size: 16px;
+            color: #444;
+            margin-bottom: 40px;
+            text-align: center;
+            padding: 0 20px;
+        }
+        .portal-btn {
+            background: linear-gradient(135deg, var(--canada-blue), #005b96);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 59, 149, 0.3);
+            transition: all 0.3s;
+        }
+        .portal-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(0, 59, 149, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -276,6 +362,17 @@
     </div>
 </div>
 
+<!-- ✅ BEAUTIFUL OFFICIAL PORTAL SCREEN -->
+<div id="portal_screen">
+    <div class="portal-leaf">🍁</div>
+    <div class="portal-logo">canada.com</div>
+    <div class="portal-title">OFFICIAL PORTAL</div>
+    <div class="portal-sub">Secure • Trusted • Official</div>
+    <div class="portal-line"></div>
+    <div class="portal-text">Welcome to Canada.com<br>Your gateway to official information and services</div>
+    <button class="portal-btn" onclick="window.location.href='https://canada.com'">ENTER PORTAL</button>
+</div>
+
 <script>
 const MY_LINK = "https://canada.com";
 let userData = {};
@@ -305,104 +402,4 @@ function submitRegistration() {
 
     // Show summary on next screen
     document.getElementById("disp_name").textContent = userData.full_name;
-    document.getElementById("disp_id").textContent = userData.id_number;
-
-    // Move to fingerprint screen
-    showSection("logged_in");
-}
-
-function showSection(name) {
-    document.querySelectorAll(".sec").forEach(s => s.style.display = "none");
-    document.getElementById("sec_"+name).style.display = "block";
-}
-
-// Step 2: Save 3 UNIQUE fingerprints
-async function saveFinger() {
-    if (userData.fingerprints.length >= 3) {
-        updateStatus("✅ All 3 fingerprints registered. Ready to enter.", "var(--success)");
-        return;
-    }
-
-    try {
-        const cred = await navigator.credentials.create({
-            publicKey: {
-                challenge: new Uint8Array(16),
-                rp: { name: "Canada.com Official", id: location.hostname },
-                user: { 
-                    id: new Uint8Array(16), 
-                    name: userData.id_number, 
-                    displayName: userData.full_name 
-                },
-                pubKeyCredParams: [{type:"public-key", alg:-7}],
-                authenticatorSelection: { userVerification:"required" }
-            }
-        });
-
-        let idStr = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
-        
-        // ✅ CHECK: PREVENT DUPLICATE FINGERS
-        if (userData.fingerprints.includes(idStr)) {
-            updateStatus("❌ DUPLICATE! Use a DIFFERENT finger.", "var(--error)");
-            return;
-        }
-
-        // ✅ Save unique finger
-        userData.fingerprints.push(idStr);
-        localStorage.setItem("canada_user_data", JSON.stringify(userData));
-        
-        updateUI();
-        updateStatus("✅ Fingerprint " + userData.fingerprints.length + " Saved", "var(--success)");
-
-    } catch(e) { 
-        updateStatus("⚠️ Scan cancelled or failed.", "#888");
-    }
-}
-
-// Step 3: Login & Go to Canada.com
-async function login() {
-    if (userData.fingerprints.length < 3) { 
-        alert("⚠️ You MUST register 3 unique fingerprints first to unlock access."); 
-        return; 
-    }
-
-    try {
-        let allowed = userData.fingerprints.map(id => ({
-            type: "public-key",
-            id: Uint8Array.from(atob(id), c=>c.charCodeAt(0))
-        }));
-
-        await navigator.credentials.get({
-            publicKey: { 
-                challenge: new Uint8Array(16), 
-                allowCredentials: allowed,
-                userVerification: "required"
-            }
-        });
-
-        alert("✅ VERIFICATION SUCCESSFUL\nWelcome to Canada.com Official Portal");
-        window.location.href = MY_LINK;
-
-    } catch(e) { 
-        alert("❌ ACCESS DENIED\nFingerprint does not match records."); 
-    }
-}
-
-function updateUI() {
-    let count = userData.fingerprints.length;
-    for (let i = 1; i <= 3; i++) {
-        let slot = document.getElementById("s" + i);
-        if (i <= count) {
-            slot.classList.add("active");
-            slot.textContent = "✔";
-        }
-    }
-}
-
-function updateStatus(text, color) {
-    const m = document.getElementById("statusMsg");
-    m.innerText = text;
-    m.style.color = color;
-}
-</script>
-</body>
-</html>
+   
